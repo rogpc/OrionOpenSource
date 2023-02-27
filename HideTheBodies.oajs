@@ -1,0 +1,124 @@
+/*
+----------------------------------------------------------------------
+	Intended as free use and open source 
+
+	Originally created by Rog
+	Discord: Rog#1337
+	Github: https://github.com/rogpc
+	
+	HideTheBodies.oajs
+	Version 1.0.1
+----------------------------------------------------------------------
+*/
+
+
+
+function HideTheBodies() { 
+// Looks for corpses on the ground within two tiles
+// If found, calls functions for harvesting hides from corpses and sending them to the bank
+	var corpses = Orion.FindTypeEx("0x2006", any, ground, "-1", "2");
+	if (corpses.length > 0) {
+		var haveBlade = Orion.FindTypeEx("0x2D2C", any, backpack, "recurse"); // <-- Sorcerer's Blade
+		var haveWarCleaver = Orion.FindTypeEx("0x2D23", any, backpack, "recurse"); // <-- Sorcerer's Blade
+		 if (haveBlade.length > 0) {
+		 	for (var i = 0; i < haveBlade.length; i++) {
+		 		var properties = haveBlade[i].Properties();
+				if (Orion.Contains(properties, "Harvester's Blade")) {
+					BladeHarvest(haveBlade[i].Serial());
+					break;
+				}
+		 	}
+		} else if (haveWarCleaver.length > 0) {
+		 	for (var i = 0; i < haveWarCleaver.length; i++) {
+		 		var properties = haveWarCleaver[i].Properties();
+				if (Orion.Contains(properties, "Butcher's War Cleaver")) {
+					WarCleaverHarvest(haveWarCleaver[i].Serial());
+					break;
+				}
+		 	}
+		} else {
+			var haveCleaver = Orion.FindTypeEx("0x0EC3", any, backpack, "recurse");
+			if (haveCleaver.length > 0) {
+				CleaverHarvest(haveCleaver[0].Serial());
+			}
+		}
+		if (Player.Weight() >= (Player.MaxWeight() * 0.85)) {
+			Orion.Wait(1200);
+			WarpyBag("0x1081", any);
+		}
+	} else {
+		Orion.CharPrint(self, "100", "I've left no bodies here.");
+	}
+}
+
+
+
+function BladeHarvest(blade) {
+	// For Harvester's Blade
+	Orion.CharPrint(self, "37", "I will bathe in thy blood.");
+	Orion.UseObject(blade);
+	Orion.WaitForTarget(2000);
+	Orion.TargetGround("0x2006", any, "2");
+}
+
+
+
+function WarCleaverHarvest(warCleaver) {
+	// For Butcher's War Cleaver
+	Orion.CharPrint(self, "37", "Filet the flesh.");
+	Orion.UseObject(warCleaver);
+	Orion.WaitForTarget(2000);
+	Orion.TargetGround("0x2006", any, "2");
+}
+
+
+
+function CleaverHarvest(cleaver) {
+	// For traditional cleaver
+	Orion.CharPrint(self, "37", "Chop chop.");
+	Orion.UseObject(cleaver);
+	Orion.WaitForTarget(2000);
+	Orion.TargetGround("0x2006", any, "2");
+	Orion.Wait(1200);
+	GetHides();
+}
+
+
+
+function GetHides() {
+	// Called by CleaverHarvest()
+	var bodies = Orion.FindType("0x2006", any, ground, "-1", "2");
+	if (bodies.length > 0) {
+		Orion.CharPrint(bodies[0], "7", "Looking for hides");
+		Orion.UseObject(bodies[0]);
+		Orion.Wait(1000);
+		var hides = Orion.FindType("0x1078", any, bodies[0], "recurse");
+		if (hides.length > 0) {
+			Orion.Print("Found some, moving hides"); 
+			Orion.MoveItem(hides[0], 0, backpack);
+			Orion.Wait(1200);
+			Orion.UseType("0x0F9E", "0x0000", backpack, "recurse");
+			Orion.WaitForTarget(2000);
+			Orion.TargetType("0x1078", any, backpack);
+		}
+	}
+}
+
+
+
+function WarpyBag(type, color) {
+	// Sends an item of the specified type and color to the bank
+	var warpyBag = Orion.FindTypeEx("0x0E76", "0x08AD|0x089B|0xNEEDGREEN", backpack, "recurse");
+	if (warpyBag.length > 0) {
+		for (var i = 0; i < warpyBag.length; i++) {
+			var bagProp = warpyBag[i].Properties();
+			if (Orion.Contains(bagProp, "A Bag Of Sending")) {
+				Orion.UseObject(warpyBag[i].Serial());
+				Orion.WaitForTarget(2000);
+				Orion.TargetType(type, color, backpack);
+			}
+		}
+	} else {
+		Orion.CharPrint(self, "95", "No warpy bag!");
+	}
+}
