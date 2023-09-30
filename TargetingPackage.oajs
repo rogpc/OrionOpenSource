@@ -1,0 +1,77 @@
+/*
+	Created by Rog
+	Discord: Rog#1337
+
+	This is dedicated to my friend Shoey
+
+Targeting Package
+version 1.0.1
+
+-IMPORTANT-
+To easily add these functions to your current script file, simply enter
+this line exactly as displayed below at the top of your main script file:
+//#includes TargetingPackage.js
+
+
+You will need to enable the Smart Last Target setting in order for this script to work properly.  You can find this setting
+in the Orion Assistant, on the Main Tab, Options 1 sub-tab, check the box for "Smart Last Target".
+
+You will want one hotkey for Seeker() to find the next target.
+You will also want one hotkey for AttackHarmful() to attack your currently selected target
+*/
+
+
+
+function Seeker() {
+	Orion.ClearHighlightCharacters();
+    var targetSerial = "0x00000000";
+// This will find the next nearest potential hostile target.
+    var tgt = Orion.FindTypeEx(any, any, ground, "fast|near|live|ignoreself|ignorefriends", "14", "gray|criminal|red|enemy");
+    if (tgt.length > 0) {
+        if (NotSummon(tgt)) {
+            try {
+            	Orion.ClearHighlightCharacters(true);
+                targetSerial = tgt[0].Serial();
+			    Orion.CharPrint(targetSerial, "37", "--TARGET--");
+			    Orion.CharPrint(self, "37", '--Target: ' + tgt[0].Name() + '--');
+			    Orion.AddHighlightCharacter(targetSerial, 1931, true);
+			    Orion.AddObject(harmtarget, targetSerial);
+			    Orion.AddObject(lasttarget, targetSerial);
+            } catch (err) {
+                Orion.Print("Error referencing target object");
+            }
+		}
+    } else {
+        Orion.Print("No more targets");
+        Orion.IgnoreReset();
+    }
+}
+
+
+
+function AttackHarmful() {
+// Attacks your currently selected "harmful" target
+    if (harmtarget !== "0x00000000") {
+        Orion.Attack(harmtarget);
+        Orion.CharPrint(harmtarget, "38", "-ATTACKING-");
+    }
+}
+
+
+
+function NotSummon(tgt) {
+// Called by Seeker(), checks if the selected target is a summon.
+    try {
+        var thisSerial = tgt[0].Serial();
+        if (Orion.Contains(tgt[0].Properties(), "(summoned)")) {
+            Orion.CharPrint(thisSerial, "41", "--Ignoring summoned creature--");
+            Orion.Ignore(thisSerial);
+            return (false);
+        } else {
+            return (true);
+        }
+    } catch(err) {
+        Orion.Print("Error referencing target object");
+        return (false);
+    }
+}
