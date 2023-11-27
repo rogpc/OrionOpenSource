@@ -1,0 +1,454 @@
+/*
+---------------------------------------------------------------------
+Copyright 2021, Roger Howard, All Rights Reserved. 
+
+	Created by Rog
+	Discord: Rog#1337
+	Github: https://github.com/rogpc
+	
+	Terminator Scan
+	Version 1.0.1
+----------------------------------------------------------------------
+*/
+// -------------------------------------------------------------------------------------------------------------
+// 
+// SET A HOTKEY FOR SCRIPT TgtData() TO ACTIVATE SCAN.
+// 
+// Passes lasttarget serial to TgtGump(), compiles your target's suit data and 
+// builds a GUI that will display all the data.  Weaknesses will be displayed in red.
+
+function TgtData() {
+	var myTarget = Orion.ClientLastTarget();
+	if (myTarget === '0x00000000') {
+		Orion.CharPrint(self, 27, '--No Target Selected--');
+	} else {
+		var tgtData = Orion.FindObject(myTarget);
+		if (tgtData !== null) {
+			Orion.CharPrint(self, 26, 'Target: ' + tgtData.Name());
+			TgtGump(myTarget);
+		}
+	}
+}
+
+
+
+function TgtGump(t) { // Developed by Rog
+	Orion.OpenPaperdoll(t);
+	Orion.GetStatus(t);
+	Orion.Wait(200);
+	var tgtObj = Orion.FindObject(t);
+	var tgtGump = Orion.CreateCustomGump(1);
+	tgtGump.Clear();
+	tgtGump.AddResizepic(0, 0, '13BE', 182, 582);
+	tgtGump.SetX(0);
+	tgtGump.SetY(0);
+	var step = 18;
+	var x = 5;
+	var y = 2;
+	var suitTotals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	// Damage Eater [0], Kinetic Eater [1], Fire Eater [2], Cold Eater [3], Poison Eater [4], Energy Eater [5], Casting Focus [6],
+	// Strength Bonus [7], Dexterity Bonus [8], Intelligence Bonus [9], Hit Point Increase [10], Stamina Increase [11],
+	// Mana Increase [12], Hit Point Regeneration [13], Stamina Regeneration [14], Mana Regeneration [15],
+	// Hit Chance Increase [16], Defense Chance Increase [17], Spell Damage Increase [18], Lower Mana Cost [19],
+	// Damage Increase [20], Swing Speed Increase [21], Enhance Potions [22], Physical Resist [23], Fire Resist [24],
+	// Cold Resist [25], Poison Resist [26], Energy Resist [27], Faster Casting [28], Faster Cast Recovery [29]
+	tgtGump.AddText(x, y, tgtObj.NameColor(), tgtObj.Name());
+	y += step;
+	tgtGump.AddText(x, y, '55', 'Race: ' + GetRace(tgtObj));
+	if (Orion.ObjAtLayer('RightHand', t)) {
+		var rightProps = ScanItem(Orion.ObjAtLayer('RightHand', t));
+		suitTotals = AddValues(suitTotals, rightProps);
+	}
+	if (Orion.ObjAtLayer('LeftHand', t)) {
+		var leftProps = ScanItem(Orion.ObjAtLayer('LeftHand', t));
+		suitTotals = AddValues(suitTotals, leftProps);
+	}
+	if (Orion.ObjAtLayer('Shoes', t)) {
+		var shoeProps = ScanItem(Orion.ObjAtLayer('Shoes', t));
+		suitTotals = AddValues(suitTotals, shoeProps);
+	}
+	if (Orion.ObjAtLayer('Pants', t)) {
+		var pantProps = ScanItem(Orion.ObjAtLayer('Pants', t));
+		suitTotals = AddValues(suitTotals, pantProps);
+	}
+	if (Orion.ObjAtLayer('Helmet', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Helmet', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('Gloves', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Gloves', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('Ring', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Ring', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('Talisman', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Talisman', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('Necklace', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Necklace', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('Waist', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Waist', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('InnerTorso', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('InnerTorso', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('Bracelet', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Bracelet', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('MidTorso', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('MidTorso', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('Earrings', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Earrings', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('Arms', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Arms', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('Cloak', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Cloak', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('Robe', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Robe', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	if (Orion.ObjAtLayer('Legs', t)) {
+		var properties = ScanItem(Orion.ObjAtLayer('Legs', t));
+		suitTotals = AddValues(suitTotals, properties);
+	}
+	y += step;
+	if (Number(suitTotals[0]) < 5) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Damage Eater: ' + suitTotals[0]);
+	y += step;
+	if (Number(suitTotals[1]) < 10) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Kinetic Eater: ' + suitTotals[1]);
+	y += step;
+	if (Number(suitTotals[2]) < 10) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Fire Eater: ' + suitTotals[2]);
+	y += step;
+	if (Number(suitTotals[3]) < 10) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Cold Eater: ' + suitTotals[3]);
+	y += step;
+	if (Number(suitTotals[4]) < 10) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Poison Eater: ' + suitTotals[4]);
+	y += step;
+	if (Number(suitTotals[5]) < 10) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Energy Eater: ' + suitTotals[5]);
+	y += step;
+	if (Number(suitTotals[6]) < 5) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Casting Focus: ' + suitTotals[6]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Strength Bonus: ' + suitTotals[7]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Dexterity Bonus: ' + suitTotals[8]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Intelligence Bonus: ' + suitTotals[9]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Hit Point Increase: ' + suitTotals[10]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Stamina Increase: ' + suitTotals[11]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Mana Increase: ' + suitTotals[12]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Hit Point Regeneration: ' + suitTotals[13]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Stamina Regeneration: ' + suitTotals[14]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Mana Regeneration: ' + suitTotals[15]);
+	y += step;
+	if (Number(suitTotals[16]) < 35) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Hit Chance Increase: ' + suitTotals[16]);
+	y += step;
+	if (Number(suitTotals[17]) < 35) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Defense Chance Increase: ' + suitTotals[17]);
+	y += step;
+	if (Number(suitTotals[20]) < 15) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, '100', 'Spell Damage Increase: ' + suitTotals[18]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Lower Mana Cost: ' + suitTotals[19]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Damage Increase: ' + suitTotals[20]);
+	y += step;
+	tgtGump.AddText(x, y, '100', 'Swing Speed Increase: ' + suitTotals[21]);
+	y += step;
+	if (Number(suitTotals[22]) < 40) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Enhance Potions: ' + suitTotals[22]);
+	y += step;
+	if (Number(suitTotals[23]) < 70) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Physical Resist: ' + suitTotals[23]);
+	y += step;
+	if (Number(suitTotals[24]) < 70) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Fire Resist: ' + suitTotals[24]);
+	y += step;
+	if (Number(suitTotals[25]) < 70) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Cold Resist: ' + suitTotals[25]);
+	y += step;
+	if (Number(suitTotals[26]) < 70) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Poison Resist: ' + suitTotals[26]);
+	y += step;
+	if (Number(suitTotals[27]) < 70) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Energy Resist: ' + suitTotals[27]);
+	y += step;
+	if (Number(suitTotals[28]) < 2) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Faster Casting: ' + suitTotals[28]);
+	y += step;
+	if (Number(suitTotals[29]) < 5) { var fontColor = 37; } else { var fontColor = 100; }
+	tgtGump.AddText(x, y, fontColor, 'Faster Cast Recovery: ' + suitTotals[29]);
+	tgtGump.Update();
+	Orion.ClosePaperdoll(t);
+}
+
+
+
+function AddValues(orig, addon) { // Developed by Rog
+	var totalArray = [];
+	for (i = 0; i < orig.length; i++) {
+		var newNum = Number(orig[i]) + Number(addon[i]);
+		totalArray.push(newNum);
+	}
+	return (totalArray);
+}
+
+
+
+function GetRace(t) { // Developed by Rog
+	var raceNum = t.Race();
+	if (raceNum === 1) {
+		return ('Human');
+	} else if (raceNum === 2) {
+		return ('Elf');
+	} else if (raceNum === 3) {
+		return ('Gargoyle');
+	} else {
+		return ('Unknown');
+	}
+}
+
+
+
+function ScanItem(s) { // Developed by Rog
+	var damEater = 0; // Damage Eater 0
+	var kinEater = 0; // Kinetic Eater 1
+	var fireEater = 0; // Fire Eater 2
+	var coldEater = 0; // Cold Eater 3
+	var poisEater = 0; // Poison Eater 4
+	var enerEater = 0; // Energy Eater 5
+	var focus = 0; // Casting Focus 6
+	var strBonus = 0; // Strength Bonus 7
+	var dexBonus = 0; // Dexterity Bonus 8
+	var intBonus = 0; // Intelligence Bonus 9
+	var hitPlus = 0; // Hit Point Increase 10
+	var stamPlus = 0; // Stamina Increase 11
+	var manaPlus = 0; // Mana Increase 12
+	var hitRegen = 0; // Hit Point Regeneration 13
+	var stamRegen = 0; // Stamina Regeneration 14
+	var manaRegen = 0; // Mana Regeneration 15
+	var hci = 0; // Hit Chance Increase 16
+	var dci = 0; // Defense Chance Increase 17
+	var sdi = 0; // Spell Damage Increase 18
+	var lmc = 0; // Lower Mana Cost 19
+	var dam = 0; // Damage Increase 20
+	var ssi = 0; // Swing Speed Increase 21
+	var ep = 0; // Enhance Potions 22
+	var phys = 0; // Physical Resist 23
+	var fire = 0; // Fire Resist 24
+	var cold = 0; // Cold Resist 25
+	var pois = 0; // Poison Resist 26
+	var ener = 0; // Energy Resist 27
+	var fCast = 0; // Faster Casting 28
+	var fReco = 0; // Faster Cast Recovery 29
+	
+	var properties = s.Properties();
+	
+	if (Orion.Contains(properties, 'Damage Eater')) {
+		var thisDamEater = /Damage Eater (\d+)/.exec(properties);
+		damEater = thisDamEater[1];
+	}
+	if (Orion.Contains(properties, 'Kinetic Eater')) {
+		var thisKinEater = /Kinetic Eater (\d+)/.exec(properties);
+		kinEater = thisKinEater[1];
+	}
+	if (Orion.Contains(properties, 'Fire Eater')) {
+		var thisFireEater = /Fire Eater (\d+)/.exec(properties);
+		fireEater = thisFireEater[1];
+	}
+	if (Orion.Contains(properties, 'Cold Eater')) {
+		var thisColdEater = /Cold Eater (\d+)/.exec(properties);
+		coldEater = thisColdEater[1];
+	}
+	if (Orion.Contains(properties, 'Poison Eater')) {
+		var thisPoisEater = /Poison Eater (\d+)/.exec(properties);
+		poisEater = thisPoisEater[1];
+	}
+	if (Orion.Contains(properties, 'Energy Eater')) {
+		var thisEnerEater = /Energy Eater (\d+)/.exec(properties);
+		enerEater = thisEnerEater[1];
+	}
+	if (Orion.Contains(properties, 'Casting Focus')) {
+		var thisFocus = /Casting Focus (\d+)/.exec(properties);
+		focus = thisFocus[1];
+	}
+	if (Orion.Contains(properties, 'Strength Bonus')) {
+		var thisStrBonus = /Strength Bonus (\d+)/.exec(properties);
+		strBonus = thisStrBonus[1];
+	}
+	if (Orion.Contains(properties, 'Dexterity Bonus')) {
+		var thisDexBonus = /Dexterity Bonus (\d+)/.exec(properties);
+		dexBonus = thisDexBonus[1];
+	}
+	if (Orion.Contains(properties, 'Intelligence Bonus')) {
+		var thisIntBonus = /Intelligence Bonus (\d+)/.exec(properties);
+		intBonus = thisIntBonus[1];
+	}
+	if (Orion.Contains(properties, 'Hit Point Increase')) {
+		var thisHitPlus = /Hit Point Increase (\d+)/.exec(properties);
+		hitPlus = thisHitPlus[1];
+	}
+	if (Orion.Contains(properties, 'Stamina Increase')) {
+		var thisStamPlus = /Stamina Increase (\d+)/.exec(properties);
+		stamPlus = thisStamPlus[1];
+	}
+	if (Orion.Contains(properties, 'Mana Increase')) {
+		var thisManaPlus = /Mana Increase (\d+)/.exec(properties);
+		manaPlus = thisManaPlus[1];
+	}
+	if (Orion.Contains(properties, 'Hit Point Regeneration')) {
+		var thisHitRegen = /Hit Point Regeneration (\d+)/.exec(properties);
+		hitRegen = thisHitRegen[1];
+	}
+	if (Orion.Contains(properties, 'Stamina Regeneration')) {
+		var thisStamRegen = /Stamina Regeneration (\d+)/.exec(properties);
+		stamRegen = thisStamRegen[1];
+	}
+	if (Orion.Contains(properties, 'Mana Regeneration')) {
+		var thisManaRegen = /Mana Regeneration (\d+)/.exec(properties);
+		manaRegen = thisManaRegen[1];
+	}
+	if (Orion.Contains(properties, 'Hit Chance Increase')) {
+		var thisHci = /Hit Chance Increase (\d+)/.exec(properties);
+		if (thisHci !== null) {
+			hci = thisHci[1];
+		} else {
+			thisHci = /Hit Chance Increase -(\d+)/.exec(properties);
+			hci = '-'+thisHci[1];
+		}
+	}
+	if (Orion.Contains(properties, 'Defense Chance Increase')) {
+		var thisDci = /Defense Chance Increase (\d+)/.exec(properties);
+		if (thisDci !== null) {
+			dci = thisDci[1];
+		} else {
+			thisDci = /Defense Chance Increase -(\d+)/.exec(properties);
+			dci = '-'+thisDci[1];
+		}
+	}
+	if (Orion.Contains(properties, 'Spell Damage Increase')) {
+		var thisSdi = /Spell Damage Increase (\d+)/.exec(properties);
+		sdi = thisSdi[1];
+	}
+	if (Orion.Contains(properties, 'Lower Mana Cost')) {
+		var thisLmc = /Lower Mana Cost (\d+)/.exec(properties);
+		lmc = thisLmc[1];
+	}
+	if (Orion.Contains(properties, 'Damage Increase') && Number(sdi) == 0) {
+		var thisDam = /Damage Increase (\d+)/.exec(properties);
+		dam = thisDam[1];
+	}
+	if (Orion.Contains(properties, 'Damage Increase') && Number(sdi) > 0) {
+		var keyPhrase = /Damage Increase (\d+)/g;
+		var myArray;
+		var counter = 0;
+		while ((myArray = keyPhrase.exec(properties)) !== null) {
+			var msg = 'Found ' + myArray[0] + ' Next match starts at ' + keyPhrase.lastIndex;
+			Orion.Print(msg);
+			newDam = myArray[1];
+			counter++;
+		}
+		if (counter >= 2) {
+			dam = newDam;
+		}
+	}
+	if (Orion.Contains(properties, 'Swing Speed Increase')) {
+		var thisSsi = /Swing Speed Increase (\d+)/.exec(properties);
+		ssi = thisSsi[1];
+	}
+	if (Orion.Contains(properties, 'Enhance Potions')) {
+		var thisEp = /Enhance Potions (\d+)/.exec(properties);
+		ep = thisEp[1];
+	}
+	if (Orion.Contains(properties, 'Physical Resist')) {
+		var thisPhys = /Physical Resist (\d+)/.exec(properties);
+		if (thisPhys !== null) {
+			phys = thisPhys[1];
+		} else {
+			thisPhys = /Physical Resist -(\d+)/.exec(properties);
+			phys = '-'+thisPhys[1];
+		}
+	}
+	if (Orion.Contains(properties, 'Fire Resist')) {
+		var thisFire = /Fire Resist (\d+)/.exec(properties);
+		if (thisFire !== null) {
+			fire = thisFire[1];
+		} else {
+			thisFire = /Fire Resist -(\d+)/.exec(properties);
+			fire = '-'+thisFire[1];
+		}
+	}
+	if (Orion.Contains(properties, 'Cold Resist')) {
+		var thisCold = /Cold Resist (\d+)/.exec(properties);
+		if (thisCold !== null) {
+			cold = thisCold[1];
+		} else {
+			thisCold = /Cold Resist -(\d+)/.exec(properties);
+			cold = '-'+thisCold[1];
+		}
+	}
+	if (Orion.Contains(properties, 'Poison Resist')) {
+		var thisPois = /Poison Resist (\d+)/.exec(properties);
+		if (thisPois !== null) {
+			pois = thisPois[1];
+		} else {
+			thisPois = /Poison Resist -(\d+)/.exec(properties);
+			pois = '-'+thisPois[1];
+		}
+	}
+	if (Orion.Contains(properties, 'Energy Resist')) {
+		var thisEner = /Energy Resist (\d+)/.exec(properties);
+		if (thisEner !== null) {
+			ener = thisEner[1];
+		} else {
+			thisEner = /Energy Resist -(\d+)/.exec(properties);
+			ener = '-'+thisEner[1];
+		}
+	}
+	if (Orion.Contains(properties, 'Faster Casting')) {
+		var thisFCast = /Faster Casting (\d+)/.exec(properties);
+		if (thisFCast !== null) {
+			fCast = thisFCast[1];
+		} else {
+			thisFCast = /Faster Casting -(\d+)/.exec(properties);
+			fCast = '-'+thisFCast[1];
+		}
+	}
+	if (Orion.Contains(properties, 'Faster Cast Recovery')) {
+		var thisFReco = /Faster Cast Recovery (\d+)/.exec(properties);
+		if (thisFReco !== null) {
+			fReco = thisFReco[1];
+		} else {
+			thisFReco = /Faster Cast Recovery -(\d+)/.exec(properties);
+			fReco = '-'+thisFReco[1];
+		}
+	}	
+	return ([damEater, kinEater, fireEater, coldEater, poisEater, enerEater, focus, strBonus, dexBonus, intBonus, hitPlus, stamPlus, manaPlus, hitRegen, stamRegen, manaRegen, hci, dci, sdi, lmc, dam, ssi, ep, phys, fire, cold, pois, ener, fCast, fReco]);
+}
